@@ -1,23 +1,24 @@
 import datetime
 import hashlib
 import json
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 class Blockchain:
     def __init__(self):
         self.chain = []
 
         #genesis block
-        self.create_block(proof= 1, prev_hash= '0', proof_of_work= None)
+        self.create_block(proof= 1, name= None, prev_hash= '0', proof_of_work= None)
     
-    def create_block(self, proof, prev_hash, proof_of_work):
+    def create_block(self, proof, name, prev_hash, proof_of_work):
         block = {
             'id_block': len(self.chain) + 1,
             'timestamp': str(datetime.datetime.now()),
+            'name': name,
             'proof': proof,
             'prev_hash': prev_hash,
-            # 'hash': hash_block,
             'proof_of_work': proof_of_work
+            # 'hash': hash_block
         }
         self.chain.append(block)
         return block
@@ -88,6 +89,26 @@ def mining():
 
     #create block
     created_balok = balok.create_block(proof, prev_hash, proof_of_work)
+    response = {
+        'message': "Blockhain is created",
+        'created_block': created_balok
+    }
+    return jsonify(response), 200
+
+@app.route("/create_block", methods=['POST'])
+def create_block():
+    name = request.form
+    prev_block = balok.get_last_block()
+
+    #get prev proof
+    prev_proof = prev_block['proof']
+    proof, proof_of_work = balok.proof_of_work(prev_proof)
+
+    #get prev hash
+    prev_hash = balok.get_hash(prev_block)
+
+    #create block
+    created_balok = balok.create_block(proof, name, prev_hash, proof_of_work)
     response = {
         'message': "Blockhain is created",
         'created_block': created_balok
