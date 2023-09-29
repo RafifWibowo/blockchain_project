@@ -8,18 +8,20 @@ class Blockchain:
         self.chain = []
 
         #genesis block
-        self.create_block(proof= 1, name= None, prev_hash= '0', proof_of_work= None)
+        self.create_block(proof= 1, data= None, prev_hash= '0', proof_of_work= None)
     
-    def create_block(self, proof, name, prev_hash, proof_of_work):
+    def create_block(self, proof, data, prev_hash, proof_of_work):
         block = {
             'id_block': len(self.chain) + 1,
             'timestamp': str(datetime.datetime.now()),
-            'name': name,
+            'data': data,
             'proof': proof,
             'prev_hash': prev_hash,
             'proof_of_work': proof_of_work
-            # 'hash': hash_block
         }
+        newKey = 'hash'
+        hashed_block = self.get_hash(block)
+        block = {**block, newKey: hashed_block}
         self.chain.append(block)
         return block
     
@@ -105,7 +107,7 @@ def create_block():
     proof, proof_of_work = balok.proof_of_work(prev_proof)
 
     #get prev hash
-    prev_hash = balok.get_hash(prev_block)
+    prev_hash = prev_block['hash']
 
     #create block
     created_balok = balok.create_block(proof, name, prev_hash, proof_of_work)
