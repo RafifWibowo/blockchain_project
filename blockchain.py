@@ -46,18 +46,18 @@ class Blockchain:
     def is_chain_valid(self):
         prev_block = self.chain[0]
         now_index = 1
-        while now_index < len(self.chain) + 1:
+        while now_index < len(self.chain):
             now_block = self.chain[now_index]
 
             # cek hash now block == prev hash
-            prev_hash = self.get_hash(prev_block)
+            prev_hash = prev_block['hash']
             if prev_hash != now_block['prev_hash']:
                 return False
             
             # cek proof of work true
             now_proof = now_block['proof']
             prev_proof = prev_block['proof']
-            hash_operation = hashlib.sha256(str(now_proof**2 - prev_proof**2).encode()).hexdigest
+            hash_operation = hashlib.sha256(str(now_proof**2 - prev_proof**2).encode()).hexdigest()
             if hash_operation[:4] != '0000':
                 return False
             
@@ -114,6 +114,40 @@ def create_block():
     response = {
         'message': "Blockhain is created",
         'created_block': created_balok
+    }
+    return jsonify(response), 200
+
+@app.route("/modify_block", methods=['POST'])
+def modify_block():
+    content_type = request.headers.get('Content-Type')
+    data = request.get_json()
+
+    id_block = data['id_block']
+    name = data['name']
+
+    block = balok.chain[id_block-1]
+    block['data'] = name
+
+    new_hash = balok.get_hash(block)
+    block['hash'] = new_hash
+
+    response = {
+        'message': "Block Modified",
+        'id_block': id_block
+    }
+    return jsonify(response), 200
+
+@app.route("/check_chain", methods=['GET'])
+def check_chain():
+    check = balok.is_chain_valid()
+    # message = ''
+    # if check != True:
+    #     message = "Chain tidak valid"
+    # else:
+    #     message = "Chain valid"
+    
+    response = {
+        'message': check
     }
     return jsonify(response), 200
 
